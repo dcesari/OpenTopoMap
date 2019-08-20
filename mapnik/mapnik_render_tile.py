@@ -5,6 +5,7 @@
 # output: png sample image
 
 from mapnik import *
+import subprocess
 
 input_mapnik_style = 'opentopomap.xml'
 output_png = 'opentopomap_output.png'
@@ -55,11 +56,14 @@ geom_settings = {
 	'aspect_y': 1.0
 }
 
-p0x, p0y, p1x, p1y = tile2prjbounds(geom_settings, 1320, 2860, 13)
+p0x, p0y, p1x, p1y = tile2prjbounds(geom_settings, 8725, 5766, 14)
 
 bbox=(Box2d(p0x, p0y, p1x, p1y))
 m.zoom_to_box(bbox)
 #m.zoom_all()
-print "env ", m.envelope()
-print "Scale = " , m.scale()
+lim = m.envelope()
+#print "Scale = " , m.scale()
 render_to_file(m, output_png)
+subprocess.call(["gdal_translate", "-a_srs", "EPSG:3857", "-a_ullr",
+                 str(lim.minx), str(lim.maxy), str(lim.maxx), str(lim.miny),
+                 output_png, output_png.replace(".png",".tiff")])
